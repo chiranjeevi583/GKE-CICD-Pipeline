@@ -1,29 +1,34 @@
 pipeline {
     agent any
     environment {
-        // Use the 'TERRAFORM-AUTHE' credential ID for Google Cloud authentication
-        GOOGLE_APPLICATION_CREDENTIALS = credentials('TERRAFORM-AUTHE')  // Ensure this matches your Jenkins credentials ID
+        GOOGLE_APPLICATION_CREDENTIALS = credentials('TERRAFORM-AUTHE')
     }
     stages {
         stage('Clone') {
             steps {
-                // Clone the repository to get the app code
-                git 'https://github.com/your-user/GKE-CICD-Pipeline.git'  // Your GitHub repo URL
+                // Clone your GitHub repository
+                git 'https://github.com/your-user/k8s-docker-app.git'
             }
         }
         stage('Build Docker Image') {
             steps {
-                // Build the Docker image using the Dockerfile in the repo
-                sh 'docker build -t gcr.io/your-gcp-project-id/app-image:latest .'  // Replace with your GCP project ID
-                sh 'gcloud auth configure-docker'  // Authenticate Docker to GCR
-                sh 'docker push gcr.io/your-gcp-project-id/app-image:latest'  // Push image to GCR
+                script {
+                    // Build Docker image and push to Google Container Registry
+                    sh 'docker build -t gcr.io/gcp-dev-space/app-image:latest .'
+                    sh 'gcloud auth configure-docker'
+                    sh 'docker push gcr.io/gcp-dev-space/app-image:latest'
+                }
             }
         }
         stage('Deploy to GKE') {
             steps {
-                // Authenticate to GKE using 'gcloud' and deploy the app
-                sh 'gcloud container clusters get-credentials gke-cluster --zone us-central1-a'  // Ensure your cluster zone matches
-                sh 'kubectl apply -f k8s/deployment.yaml'  // Apply the deployment YAML for Kubernetes
+                script {
+                    // Authenticate with GKE cluster
+                    sh 'gcloud container clusters get-credentials gke-cluster --zone us-central1-a --project gcp-dev-space'
+
+                    // Apply Kubernetes YAML to deploy the app
+                    sh 'kubectl apply -f k8s/deployment.yaml'
+                }
             }
         }
     }
