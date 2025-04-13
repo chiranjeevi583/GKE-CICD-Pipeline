@@ -7,7 +7,8 @@ pipeline {
         stage('Clone') {
             steps {
                 // Clone your GitHub repository
-                git 'https://github.com/your-user/k8s-docker-app.git'
+               git 'https://github.com/chiranjeevi583/GKE-CICD-Pipeline.git'
+
             }
         }
         stage('Build Docker Image') {
