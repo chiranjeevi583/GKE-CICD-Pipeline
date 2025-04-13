@@ -26,8 +26,11 @@ pipeline {
                     // Authenticate with GKE cluster
                     sh 'gcloud container clusters get-credentials gke-cluster --zone us-central1-a --project gcp-dev-space'
 
-                    // Apply Kubernetes YAML to deploy the app
-                    sh 'kubectl apply -f k8s/deployment.yaml'
+                    // Create a Kubernetes Deployment directly using kubectl
+                    sh '''
+                    kubectl create deployment app-deployment --image=gcr.io/gcp-dev-space/app-image:latest
+                    kubectl expose deployment app-deployment --type=LoadBalancer --port=80 --target-port=8080
+                    '''
                 }
             }
         }
